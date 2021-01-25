@@ -16,7 +16,7 @@ const storage = new CloudinaryStorage({
   },
 });
 const uploadCloudinary = multer({ storage: storage });
-const uploadCloudinaryWithLimits = multer({
+const uploadCloudinaryWithLimit = multer({
   storage: storage,
   fileFilter: function (req, file, callback) {
     const ext = extname(file.originalname);

@@ -12,7 +12,7 @@ const {
   badRequestHandler,
 } = require("./errorHandler");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const whiteList =
   process.env.NODE_ENV === "production"
@@ -40,12 +40,13 @@ app.use(notFound);
 app.use(badRequestHandler);
 app.use(catchAll);
 
-console.log(listEndpoints(app));
+// console.log(listEndpoints(app));
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
   })
   .then(() =>
     app.listen(port, () => {

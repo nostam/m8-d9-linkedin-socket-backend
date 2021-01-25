@@ -1,7 +1,7 @@
 const express = require("express");
 const PostsRouter = express.Router();
 const { validatePost } = require("../../validator");
-
+const { validationResult } = require("express-validator");
 const PostsModel = require("../../model/posts");
 const { APIError } = require("../../utils");
 const {
@@ -21,7 +21,11 @@ PostsRouter.route("/")
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) throw APIError(errors.array(), 404);
-      const newPost = await PostsModel(req.body);
+      const payload = {
+        ...req.body,
+        image: req.body.image ? req.body.image : "https://picsum.photos/x400",
+      };
+      const newPost = await PostsModel(payload);
       const { _id } = await newPost.save();
       res.status(201).send(_id);
     } catch (error) {
@@ -63,9 +67,12 @@ PostsRouter.route("/:postId")
     let imageUrl;
     if (req.file && req.file.path) imageUrl = req.file.path;
     try {
-      const post = await PostsModel.findById(req.params.id);
-      const payload = { ...post, image: imageUrl };
-      const _id = await PostsModel.updatePostByPostId(req.params.id, payload);
+      const { _doc } = await PostsModel.findById(req.params.postId);
+      const payload = { ..._doc, image: imageUrl };
+      const _id = await PostsModel.updatePostByPostId(
+        req.params.postId,
+        payload
+      );
       res.status(201).send(_id);
     } catch (error) {
       next(error);
