@@ -14,7 +14,6 @@ const {
 
 
 const profilesRoute = require("./services/profiles")
-const experienceRoute = require("./services/experiences")
 
 const port = process.env.PORT || 3001;
 
@@ -46,7 +45,7 @@ app.use(notFound);
 app.use(badRequestHandler);
 app.use(catchAll);
 
-console.log(listEndpoints(app));
+
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {
