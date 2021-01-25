@@ -3,7 +3,7 @@ const app = express.Router()
 const multer = require("multer")
 const { CloudinaryStorage } = require("multer-storage-cloudinary")
 const cloudinary = require("../../config/cloudinary")
-
+const PDFDocument = require("pdfkit")
 const requestIp = require('request-ip');
 
 const ProfileSchema = require("../../schemas/profile_schema")
@@ -55,6 +55,22 @@ app.get('/:id', async (req, res, next) => {
 
 app.get('/:id/cv', async (req, res, next) => {
     try {
+        const profile = await ProfileSchema.findById(req.params.id)
+
+        console.log(profile)
+        const doc = new PDFDocument
+
+        doc.text(profile.username)
+        doc.text(profile.name)
+        doc.text(profile.surname)
+        doc.text(profile.title)
+        doc.text(profile.area)
+        doc.text(profile.email)
+        doc.text(profile.bio)
+        doc.text(profile.image)
+
+        doc.pipe(res)
+        doc.end()
 
     } catch (err) {
         console.log("\x1b[31m", err)
@@ -81,9 +97,11 @@ app.post('/', async (req, res, next) => {
     }
 });
 
-app.post('/:id/img_upld', async (req, res, next) => {
+app.post('/:id/img_upld', multerCloudinary.single("image"), async (req, res, next) => {
     try {
-
+        const clientIp = requestIp.getClientIp(req);
+        res.status(201).send("Image uploaded on product id:" + req.params.id)
+        console.log("\x1b[32m", clientIp + " uploaded an image on product id: " + req.params.id)
     } catch (err) {
         console.log("\x1b[31m", err)
         next(err)
@@ -129,5 +147,6 @@ app.delete('/:id', async (req, res, next) => {
         next(err)
     }
 });
+
 
 module.exports = app
