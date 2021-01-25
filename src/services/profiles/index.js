@@ -56,11 +56,10 @@ app.get('/:id', async (req, res, next) => {
 app.get('/:id/cv', async (req, res, next) => {
     try {
         const profile = await ProfileSchema.findById(req.params.id)
-
-        console.log(profile)
         const doc = new PDFDocument
 
-        doc.text(profile.username)
+        doc.fontSize(25)
+            .text(profile.username)
         doc.text(profile.name)
         doc.text(profile.surname)
         doc.text(profile.title)
@@ -71,7 +70,6 @@ app.get('/:id/cv', async (req, res, next) => {
 
         doc.pipe(res)
         doc.end()
-
     } catch (err) {
         console.log("\x1b[31m", err)
         next(err)

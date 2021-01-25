@@ -29,7 +29,7 @@ app.use(notFound);
 app.use(badRequestHandler);
 app.use(catchAll);
 
-console.log(listEndpoints(app))
+
 
 mongoose
     .connect(process.env.MONGO_CONNECTION, {
@@ -39,6 +39,7 @@ mongoose
     .then(() =>
         app.listen(port, () => {
             console.log("\x1b[34m", "Running on port", port, "\x1b[37m")
+            console.log(listEndpoints(app))
         })
     )
     .catch(err => console.log(err))
