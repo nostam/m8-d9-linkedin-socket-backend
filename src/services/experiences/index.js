@@ -12,7 +12,7 @@ const requestIp = require('request-ip');
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-      folder: process.env.FOLDER_NAME,
+      folder: "striveTest",
       allowedFormats: ["jpg", "png", "jpeg"],
     },
 })
@@ -48,15 +48,30 @@ app.get('/:userName/exp/:expId', async (req, res, next) => {
         next(err)
     }
 });
-/// waaait
-app.get('/:id/cv', async (req, res, next) => {
-    try {
-
-    } catch (err) {
-        console.log("\x1b[31m", err)
-        next(err)
-    }
-});
+/// waaait  i will do it
+// app.get('/:userName/exp/csv', async (req, res, next) => {
+//     try {
+//         const profile = await ProfileSchema.findOne({username:req.params.userName})
+//         const experince = await ExperienceSchema.find({username:profile._id}).populate("username")
+        
+//         const jsonReadableStream = createReadStream(experince)
+//         const json2csv = new Transform({
+//             fields:["role","company","description"],
+//         })
+//        res.setHeader("Content-Disposition","attachment; filename=export.csv")
+//        pipeline(jsonReadableStream,json2csv,res,err=>{
+//         if (err) {
+//             console.log(err)
+//             next(err)
+//           } else {
+//             console.log("Done")
+//           }
+//        })
+//     } catch (err) {
+//         console.log("\x1b[31m", err)
+//         next(err)
+//     }
+// });
 /// post is done
 app.post('/:username/exp', async (req, res, next) => {
     try {
@@ -86,7 +101,7 @@ app.post('/:username/exp', async (req, res, next) => {
 
 app.post('/:userName/exp/:expId/upload', multerCloudinary.single("image"),async (req, res, next) => {
     try {
-        const addPicture = await ExperienceSchema.findByIdAndUpdate(req.params.id, {
+        const addPicture = await ExperienceSchema.findByIdAndUpdate(req.params.expId, {
           $set: {
             image: req.file.path,
           },
