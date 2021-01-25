@@ -9,13 +9,5 @@ MONGO_CONNECTION
 CLOUD_NAME
 CLOUD_API_KEY
 CLOUD_API_SECRET
-```
-
-# this is a sample note
-
-Today I have my assessment
-
-```JS
-// JS comment
-res.send()
+CLOUD_FOLDER_NAME
 ```
