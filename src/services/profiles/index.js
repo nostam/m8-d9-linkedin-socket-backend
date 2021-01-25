@@ -8,6 +8,8 @@ const requestIp = require('request-ip');
 
 const ProfileSchema = require("../../schemas/profile_schema")
 
+
+
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
@@ -20,7 +22,7 @@ const multerCloudinary = multer({
 
 app.get('/', async (req, res, next) => {
     try {
-        const profiles = await ProfileSchema.find()
+        const profiles = await ProfileSchema.find().populate("reviews")
         const clientIp = requestIp.getClientIp(req);
 
         if (profiles.length > 0) {
@@ -129,5 +131,6 @@ app.delete('/:id', async (req, res, next) => {
         next(err)
     }
 });
+
 
 module.exports = app

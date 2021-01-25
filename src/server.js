@@ -12,6 +12,7 @@ const {
 } = require("./errorHandler");
 
 const profilesRoute = require("./services/profiles")
+const experienceRoute = require("./services/experiences")
 
 const port = process.env.PORT
 
@@ -21,6 +22,7 @@ app.use(express.json());
 // Endpoints
 
 app.use("/profiles", profilesRoute)
+app.use("/experiences", experienceRoute)
 
 app.use(unauthorized);
 app.use(forbidden);
