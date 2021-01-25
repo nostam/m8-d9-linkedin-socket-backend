@@ -12,9 +12,6 @@ const {
   badRequestHandler,
 } = require("./errorHandler");
 
-
-const profilesRoute = require("./services/profiles")
-
 const port = process.env.PORT || 3001;
 
 const whiteList =
@@ -35,8 +32,7 @@ app.use(cors());
 app.use(express.json());
 
 // Endpoints
-app.use("/profiles", profilesRoute)
-app.use("/experiences", experienceRoute)
+
 app.use("/", servicesRoutes);
 
 app.use(unauthorized);
@@ -44,8 +40,6 @@ app.use(forbidden);
 app.use(notFound);
 app.use(badRequestHandler);
 app.use(catchAll);
-
-
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {
