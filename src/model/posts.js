@@ -34,20 +34,11 @@ PostsSchema.static("getAllPosts", async function (req) {
   }
 });
 
-PostsSchema.static("getPostByPostId", async function (postId) {
+PostsSchema.static("updatePostByPostId", async function (postId, body) {
   try {
-    const post = await this.findById(postId);
-    return post;
-  } catch (error) {
-    throw new APIError(error);
-  }
-});
-
-PostsSchema.static("updatePostByPostId", async function (postId) {
-  try {
-    const updatePost = await this.findByIdAndDelete(
+    const updatePost = await this.findByIdAndUpdate(
       postId,
-      { $push: { reviews: req.body } },
+      { $set: { text: body.text, image: body.image ? body.image : "" } },
       { runValidators: true, new: true }
     );
     const { _id } = await updatePost.save();
