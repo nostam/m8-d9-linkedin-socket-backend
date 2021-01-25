@@ -11,6 +11,8 @@ const {
     badRequestHandler,
 } = require("./errorHandler");
 
+const profilesRoute = require("./services/profiles")
+
 const port = process.env.PORT
 
 app.use(cors());
@@ -18,6 +20,7 @@ app.use(express.json());
 
 // Endpoints
 
+app.use("/profiles", profilesRoute)
 
 app.use(unauthorized);
 app.use(forbidden);
