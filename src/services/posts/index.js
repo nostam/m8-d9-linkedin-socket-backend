@@ -20,7 +20,7 @@ PostsRouter.route("/")
   .post(validatePost, async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) throw APIError(errors.array(), 404);
+      if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
       const payload = {
         ...req.body,
         image: req.body.image ? req.body.image : "https://picsum.photos/x400",
@@ -45,7 +45,7 @@ PostsRouter.route("/:postId")
   .put(validatePost, async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) throw APIError(errors.array(), 404);
+      if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
       const _id = await PostsModel.updatePostByPostId(
         req.params.postId,
         req.body
