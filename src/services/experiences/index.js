@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express.Router();
 const multer = require("multer");
-
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const ExperienceSchema = require("../../model/experiences");
 const ProfileSchema = require("../../model/profiles");
@@ -63,6 +63,37 @@ app.get("/:userName/exp/:expId", async (req, res, next) => {
 //     }
 // });
 /// post is done
+
+app.get("/:username/exp/csv",async(req,res,next)=>{
+  try {
+    
+    const profile = await ProfileSchema.findOne({
+      username: req.params.userName,
+    });
+    const data = await ExperienceSchema.find({
+      username: profile._id, })
+
+
+const csvWriter = createCsvWriter({
+  path: "../../../public.file.csv",
+  header: [
+  
+    { id: "role", title: "role" },
+    { id: "description", title: "description" },
+    { id: "company", title: "company" }
+  ]
+});
+
+csvWriter
+  .writeRecords(data)
+  .then(() =>
+    console.log("Write to file.csv successfully!")
+  );
+
+  } catch (error) {
+    next(error)
+  }
+})
 app.post("/:username/exp", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
@@ -126,6 +157,7 @@ app.put("/:userName/exp/:expId", async (req, res, next) => {
     next(err);
   }
 });
+
 
 app.delete("/:userName/exp/:expId", async (req, res, next) => {
   try {
