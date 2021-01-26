@@ -1,5 +1,6 @@
 const { Schema } = require("mongoose");
 const mongoose = require("mongoose");
+const mongoose_csv = require("mongoose-csv");
 
 const ExperienceSchema = new Schema(
   {
@@ -29,6 +30,8 @@ ExperienceSchema.static("addUser", async function (user) {
     }
   );
 });
+
+ExperienceSchema.plugin(mongoose_csv);
 
 Experience_Schema = mongoose.model("experiences", ExperienceSchema);
 

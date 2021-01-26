@@ -6,7 +6,8 @@ const { uploadCloudinary } = require("../../utils/cloudinary");
 const ExperienceSchema = require("../../model/experiences");
 const ProfileSchema = require("../../model/profiles");
 const requestIp = require("request-ip");
-
+const path = require("path");
+const { createReadStream, createWriteStream } = require("fs-extra");
 /// First one is done
 app.get("/:userName", async (req, res, next) => {
   try {
@@ -24,20 +25,7 @@ app.get("/:userName", async (req, res, next) => {
     next(err);
   }
 });
-/// second one is done
-app.get("/:userName/exp/:expId", async (req, res, next) => {
-  try {
-    const profile = await ProfileSchema.findOne({
-      username: req.params.userName,
-    });
-    const experince = await ExperienceSchema.findById(req.params.expId);
-    console.log(experince);
-    res.send(experince);
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
+
 /// waaait  i will do it
 // app.get('/:userName/exp/csv', async (req, res, next) => {
 //     try {
@@ -64,36 +52,26 @@ app.get("/:userName/exp/:expId", async (req, res, next) => {
 // });
 /// post is done
 
-app.get("/:username/exp/csv",async(req,res,next)=>{
+app.get("/:username/exp/csv", async (req, res, next) => {
   try {
-    
     const profile = await ProfileSchema.findOne({
-      username: req.params.userName,
+      username: req.params.username,
     });
-    const data = await ExperienceSchema.find({
-      username: profile._id, })
-
-
-const csvWriter = createCsvWriter({
-  path: "../../../public.file.csv",
-  header: [
-  
-    { id: "role", title: "role" },
-    { id: "description", title: "description" },
-    { id: "company", title: "company" }
-  ]
-});
-
-csvWriter
-  .writeRecords(data)
-  .then(() =>
-    console.log("Write to file.csv successfully!")
-  );
-
+    res.writeHead(200, {
+      "Content-Type": "text/csv",
+      "Content-Disposition": "attachment; filename=data.csv",
+    });
+    Experience_Schema.find({
+      username: profile._id,
+    })
+      .populate("username")
+      .sort({ _id: 1 })
+      .limit(100)
+      .csv(res);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 app.post("/:username/exp", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
@@ -144,6 +122,20 @@ app.post(
     }
   }
 );
+/// second one is done
+app.get("/:userName/exp/:expId", async (req, res, next) => {
+  try {
+    const profile = await ProfileSchema.findOne({
+      username: req.params.userName,
+    });
+    const experince = await ExperienceSchema.findById(req.params.expId);
+    console.log(experince);
+    res.send(experince);
+  } catch (err) {
+    console.log("\x1b[31m", err);
+    next(err);
+  }
+});
 /// put is done
 app.put("/:userName/exp/:expId", async (req, res, next) => {
   try {
@@ -157,7 +149,6 @@ app.put("/:userName/exp/:expId", async (req, res, next) => {
     next(err);
   }
 });
-
 
 app.delete("/:userName/exp/:expId", async (req, res, next) => {
   try {
