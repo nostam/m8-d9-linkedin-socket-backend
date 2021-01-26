@@ -145,7 +145,7 @@ app.get("/:userName/exp/:expId", async (req, res, next) => {
 app.put("/:userName/exp/:expId", async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) throw APIError(errors.array(), 404);
+    if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
     const modifed = await ExperienceSchema.findByIdAndUpdate(req.params.expId, {
       ...req.body,
     });
