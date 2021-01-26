@@ -1,10 +1,10 @@
 const express = require("express");
 const app = express.Router();
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
+
+const validateProfile = require("../../validator")
 
 const ProfileSchema = require("../../model/profiles");
 
@@ -79,7 +79,7 @@ app.get("/:id/cv", async (req, res, next) => {
   }
 });
 
-app.post("/", async (req, res, next) => {
+app.post("/", validateProfile, async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
     const newProfile = new ProfileSchema(req.body);
@@ -119,7 +119,7 @@ app.post(
   }
 );
 
-app.put("/:id", async (req, res, next) => {
+app.put("/:id", validateProfile, async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
     const modifiedProfile = await ProfileSchema.findByIdAndUpdate(
@@ -142,8 +142,8 @@ app.put("/:id", async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-          " tried to modify a profile but encountered an error, id: " +
-          req.params.id
+        " tried to modify a profile but encountered an error, id: " +
+        req.params.id
       );
       next();
     }
@@ -168,8 +168,8 @@ app.delete("/:id", async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-          " tried to delete a profile but encountered an error, id: " +
-          req.params.id
+        " tried to delete a profile but encountered an error, id: " +
+        req.params.id
       );
       next();
     }
