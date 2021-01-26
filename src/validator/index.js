@@ -1,6 +1,12 @@
 const { body } = require("express-validator");
 
-const validateExperience = [];
+const validateExperience = [
+  body("role","tell your role").isString(),
+  body("company","tell your role").isString(),
+  body("description","tell your role").isString(),
+
+
+];
 const validateProfile = [];
 
 const validatePost = [
@@ -8,5 +14,6 @@ const validatePost = [
   body("username", "Invalid username").isAlphanumeric(),
   body("user.id").isAlphanumeric(),
 ];
+
 
 module.exports = { validatePost, validateExperience, validateProfile };
