@@ -4,13 +4,13 @@ const mongoose_csv = require("mongoose-csv");
 
 const ExperienceSchema = new Schema(
   {
-    role: String,
-    company: String,
-    startDate: String,
-    description: String,
-    area: String,
+    role: {type:String,required:true},
+    company: {type:String,required:true},
+    startDate: {type:String,required:true},
+    description: {type:String,required:true},
+    area: {type:String,required:true},
 
-    image: String,
+    image: {type:String,default:"https://picsum.photos/x400"},
     username: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "profiles",
@@ -20,16 +20,16 @@ const ExperienceSchema = new Schema(
     timestamps: true,
   }
 );
-ExperienceSchema.static("addUser", async function (user) {
-  console.log("is this my user", user);
+// ExperienceSchema.static("addUser", async function (user) {
+//   console.log("is this my user", user);
 
-  await ExperienceSchema.findOneAndUpdate(
-    { _id: id },
-    {
-      $addToSet: { username: { user } },
-    }
-  );
-});
+//   await ExperienceSchema.findOneAndUpdate(
+//     { _id: id },
+//     {
+//       $addToSet: { username: { user } },
+//     }
+//   );
+// });
 
 ExperienceSchema.plugin(mongoose_csv);
 

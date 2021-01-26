@@ -40,7 +40,7 @@ PostsSchema.static("updatePostByPostId", async function (postId, body) {
       {
         $set: {
           text: body.text,
-          image: body.image ? body.image : "https://picsum.photos/x400",
+          image: body.image ? body.image :"https://picsum.photos/x400",
         },
       },
       { runValidators: true, new: true }

@@ -1,12 +1,15 @@
 const express = require("express");
 const app = express.Router();
 const multer = require("multer");
+const {validateExperience} = require("../../validator")
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const ExperienceSchema = require("../../model/experiences");
 const ProfileSchema = require("../../model/profiles");
+const { validationResult } = require("express-validator");
 const requestIp = require("request-ip");
 const path = require("path");
+const {APIERROR} = require("../../utils")
 const { createReadStream, createWriteStream } = require("fs-extra");
 /// First one is done
 app.get("/:userName", async (req, res, next) => {
@@ -72,8 +75,10 @@ app.get("/:username/exp/csv", async (req, res, next) => {
     next(error);
   }
 });
-app.post("/:username/exp", async (req, res, next) => {
+app.post("/:username/exp",validateExperience, async (req, res, next) => {
   try {
+    const errors = validationResult(req)
+    if(!errors.isEmpty()) throw APIERROR(errors.array(),404)
     const profile = await ProfileSchema.findOne({
       username: req.params.username,
     });
@@ -85,9 +90,9 @@ app.post("/:username/exp", async (req, res, next) => {
 
       const myExp = new ExperienceSchema(newExperience);
       await myExp.save();
-      res.send(myExp);
+      res.status(201).send(myExp);
     } else {
-      res.send("false");
+      res.send("Error");
     }
   } catch (err) {
     console.log("\x1b[31m", err);
@@ -100,6 +105,7 @@ app.post(
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
+
       const addPicture = await ExperienceSchema.findByIdAndUpdate(
         req.params.expId,
         {
@@ -139,6 +145,8 @@ app.get("/:userName/exp/:expId", async (req, res, next) => {
 /// put is done
 app.put("/:userName/exp/:expId", async (req, res, next) => {
   try {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) throw APIError(errors.array(), 404);
     const modifed = await ExperienceSchema.findByIdAndUpdate(req.params.expId, {
       ...req.body,
     });
