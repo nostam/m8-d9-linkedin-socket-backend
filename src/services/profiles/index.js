@@ -4,7 +4,7 @@ const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
 
-const validateProfile = require("../../validator")
+const { validateProfile } = require("../../validator")
 
 const ProfileSchema = require("../../model/profiles");
 
@@ -36,9 +36,7 @@ app.get("/", async (req, res, next) => {
 app.get("/:id", async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
-    const profile = await ProfileSchema.findById(req.params.id).populate(
-      "reviews"
-    );
+    const profile = await ProfileSchema.findById(req.params.id)
     if (profile) {
       res.status(200).send(profile);
       console.log("\x1b[32m", clientIp + " did GET/profiles/" + req.params.id);
@@ -106,14 +104,18 @@ app.post(
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
-      const clientIp = requestIp.getClientIp(req);
-      res.status(201).send("Image uploaded on product id:" + req.params.id);
-      console.log(
-        "\x1b[32m",
-        clientIp + " uploaded an image on product id: " + req.params.id
+
+      const addPicture = await ProfileSchema.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            image: req.file.path,
+          },
+        }
       );
+      res.status(200).send(addPicture);
     } catch (err) {
-      console.log("\x1b[31m", err);
+      console.log(err);
       next(err);
     }
   }

@@ -21,5 +21,10 @@ const validatePost = [
   body("user.id").isAlphanumeric(),
 ];
 
+const validateComment = [
+  body("user", "invalid user").exists(),
+  body("content", "invalid content").isString(),
+]
 
-module.exports = { validatePost, validateExperience, validateProfile };
+
+module.exports = { validatePost, validateExperience, validateProfile, validateComment };
