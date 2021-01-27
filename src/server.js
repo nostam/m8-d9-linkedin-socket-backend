@@ -45,11 +45,11 @@ passport.deserializeUser(Profile.deserializeUser());
 
 app.use("/", servicesRoutes);
 
-app.use(unauthorized);
-app.use(forbidden);
-app.use(notFound);
-app.use(badRequestHandler);
-app.use(catchAll);
+// app.use(unauthorized);
+// app.use(forbidden);
+// app.use(notFound);
+// app.use(badRequestHandler);
+// app.use(catchAll);
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {

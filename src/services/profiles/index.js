@@ -4,7 +4,7 @@ const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
 const { validateProfile } = require("../../validator")
-const jwt = require("jsonwebtoken")
+const jwt = require("express-jwt")
 
 const mailgun = require("mailgun-js");
 const DOMAIN = process.env.MG_DOMAIN;
@@ -36,12 +36,6 @@ app.post('/', async (req, res, next) => {
 
 app.post('/login', async (req, res, next) => {
   try {
-    Profile = await ProfileSchema(req.body)
-
-    Profile.doLogin = function (req, res) {
-
-    };
-
   } catch (err) {
     console.log(err)
     next(err);
@@ -50,7 +44,8 @@ app.post('/login', async (req, res, next) => {
 
 app.get("/", async (req, res, next) => {
   try {
-    const profiles = await ProfileSchema.find();
+    const regex = new RegExp(req.query.name, "ig")
+    const profiles = await ProfileSchema.find({ $or: [{ "name": regex }, { "surname": regex }] });
     const clientIp = requestIp.getClientIp(req);
 
     if (profiles.length > 0) {
