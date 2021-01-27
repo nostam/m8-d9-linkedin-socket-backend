@@ -12,7 +12,7 @@ const path = require("path");
 const { APIError } = require("../../utils");
 const { createReadStream, createWriteStream } = require("fs-extra");
 /// First one is done
-app.get("/profile/:userName", async (req, res, next) => {
+app.get("/profile/:userName/experiences", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
       username: req.params.userName,
@@ -29,7 +29,7 @@ app.get("/profile/:userName", async (req, res, next) => {
   }
 });
 
-app.get("/profile/:username/exp/csv", async (req, res, next) => {
+app.post("/profile/:username/experiences/CSV", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
       username: req.params.username,
@@ -49,7 +49,7 @@ app.get("/profile/:username/exp/csv", async (req, res, next) => {
     next(error);
   }
 });
-app.post("/profile/:username/exp", validateExperience, async (req, res, next) => {
+app.post("/profile/:username/experiences", validateExperience, async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
@@ -75,7 +75,7 @@ app.post("/profile/:username/exp", validateExperience, async (req, res, next) =>
 });
 
 app.post(
-  "/profile/:userName/exp/:expId/upload",
+  "/profile/:userName/experiences/:expId/upload",
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
@@ -102,7 +102,7 @@ app.post(
   }
 );
 /// second one is done
-app.get("/profile/:userName/exp/:expId", async (req, res, next) => {
+app.get("/profile/:userName/experiences/:expId", async (req, res, next) => {
   try {
     await ProfileSchema.findOne({
       username: req.params.userName,
@@ -116,7 +116,7 @@ app.get("/profile/:userName/exp/:expId", async (req, res, next) => {
   }
 });
 /// put is done
-app.put("/profile/:userName/exp/:expId", async (req, res, next) => {
+app.put("/profile/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
@@ -131,7 +131,7 @@ app.put("/profile/:userName/exp/:expId", async (req, res, next) => {
   }
 });
 
-app.delete("/profile/:userName/exp/:expId", async (req, res, next) => {
+app.delete("/profile/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const deleteExperice = await ExperienceSchema.findByIdAndDelete(
       req.params.expId
