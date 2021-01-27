@@ -8,7 +8,10 @@ const jwt = require("express-jwt");
 
 const mailgun = require("mailgun-js");
 const DOMAIN = process.env.MG_DOMAIN;
-const mg = mailgun({ apiKey: process.env.MG_APIKEY, domain: MG_DOMAIN });
+const mg = mailgun({
+  apiKey: process.env.MG_APIKEY,
+  domain: process.env.MG_DOMAIN,
+});
 const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
