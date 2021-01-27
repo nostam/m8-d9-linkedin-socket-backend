@@ -1,16 +1,53 @@
 const express = require("express");
 const app = express.Router();
-const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
+const { validateProfile } = require("../../validator");
+const jwt = require("express-jwt");
+
+const mailgun = require("mailgun-js");
+const DOMAIN = process.env.MG_DOMAIN;
+const mg = mailgun({ apiKey: process.env.MG_APIKEY, domain: MG_DOMAIN });
+const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
 
+app.post("/", async (req, res, next) => {
+  try {
+    Profile = await new ProfileSchema(req.body);
+    ProfileSchema.register(Profile, req.body.password, async function () {
+      await Profile.save();
+      const email = await req.body.email;
+      const data = {
+        from: senderEmail,
+        to: email,
+        subject: "Hello",
+        text: `Hello '${req.body.surname}', you email has been used to create an account on linkedin. If you don't know what's going on, contact our support `,
+      };
+      mg.messages().send(data);
+      res.send("profile created!");
+    });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
+app.post("/login", async (req, res, next) => {
+  try {
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
 app.get("/", async (req, res, next) => {
   try {
-    const profiles = await ProfileSchema.find();
+    const regex = new RegExp(req.query.name, "ig");
+    const profiles = await ProfileSchema.find({
+      $or: [{ name: regex }, { surname: regex }],
+    });
     const clientIp = requestIp.getClientIp(req);
 
     if (profiles.length > 0) {
@@ -36,9 +73,7 @@ app.get("/", async (req, res, next) => {
 app.get("/:id", async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
-    const profile = await ProfileSchema.findById(req.params.id).populate(
-      "reviews"
-    );
+    const profile = await ProfileSchema.findById(req.params.id);
     if (profile) {
       res.status(200).send(profile);
       console.log("\x1b[32m", clientIp + " did GET/profiles/" + req.params.id);
@@ -79,47 +114,25 @@ app.get("/:id/cv", async (req, res, next) => {
   }
 });
 
-app.post("/", async (req, res, next) => {
-  try {
-    const clientIp = requestIp.getClientIp(req);
-    const newProfile = new ProfileSchema(req.body);
-    var { _id } = await newProfile.save();
-    if (_id) {
-      res.status(200).send("Created! here's the id of the profile: " + _id);
-      console.log("\x1b[32m", clientIp + " created a profile. Id: " + _id);
-    } else {
-      res.send("Unknown error");
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp + " tried to create a profile but encountered an error"
-      );
-      next();
-    }
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
-
 app.post(
   "/:id/img_upld",
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
-      const clientIp = requestIp.getClientIp(req);
-      res.status(201).send("Image uploaded on product id:" + req.params.id);
-      console.log(
-        "\x1b[32m",
-        clientIp + " uploaded an image on product id: " + req.params.id
-      );
+      const addPicture = await ProfileSchema.findByIdAndUpdate(req.params.id, {
+        $set: {
+          image: req.file.path,
+        },
+      });
+      res.status(200).send(addPicture);
     } catch (err) {
-      console.log("\x1b[31m", err);
+      console.log(err);
       next(err);
     }
   }
 );
 
-app.put("/:id", async (req, res, next) => {
+app.put("/:id", validateProfile, async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
     const modifiedProfile = await ProfileSchema.findByIdAndUpdate(

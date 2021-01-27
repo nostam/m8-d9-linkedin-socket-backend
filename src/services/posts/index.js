@@ -40,9 +40,8 @@ PostsRouter.route("/")
 PostsRouter.route("/:postId")
   .get(async (req, res, next) => {
     try {
-      const payload = await PostsModel.findById(req.params.postId).populate(
-        "user"
-      );
+      const payload = await PostsModel.findById(req.params.postId)
+        .populate(["comments", "user"]);
       res.send(payload);
     } catch (error) {
       next(error);

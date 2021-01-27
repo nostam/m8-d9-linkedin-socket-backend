@@ -1,18 +1,12 @@
 const express = require("express");
 const app = express.Router();
-const multer = require("multer");
 const { validateExperience } = require("../../validator");
-const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const ExperienceSchema = require("../../model/experiences");
 const ProfileSchema = require("../../model/profiles");
-const { validationResult } = require("express-validator");
-const requestIp = require("request-ip");
-const path = require("path");
 const { APIError } = require("../../utils");
-const { createReadStream, createWriteStream } = require("fs-extra");
 /// First one is done
-app.get("/:userName", async (req, res, next) => {
+app.get("/profile/:userName", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
       username: req.params.userName,
@@ -29,33 +23,7 @@ app.get("/:userName", async (req, res, next) => {
   }
 });
 
-/// waaait  i will do it
-// app.get('/:userName/exp/csv', async (req, res, next) => {
-//     try {
-//         const profile = await ProfileSchema.findOne({username:req.params.userName})
-//         const experince = await ExperienceSchema.find({username:profile._id}).populate("username")
-
-//         const jsonReadableStream = createReadStream(experince)
-//         const json2csv = new Transform({
-//             fields:["role","company","description"],
-//         })
-//        res.setHeader("Content-Disposition","attachment; filename=export.csv")
-//        pipeline(jsonReadableStream,json2csv,res,err=>{
-//         if (err) {
-//             console.log(err)
-//             next(err)
-//           } else {
-//             console.log("Done")
-//           }
-//        })
-//     } catch (err) {
-//         console.log("\x1b[31m", err)
-//         next(err)
-//     }
-// });
-/// post is done
-
-app.get("/:username/exp/csv", async (req, res, next) => {
+app.get("/profile/:username/exp/csv", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
       username: req.params.username,
@@ -75,7 +43,7 @@ app.get("/:username/exp/csv", async (req, res, next) => {
     next(error);
   }
 });
-app.post("/:username/exp", validateExperience, async (req, res, next) => {
+app.post("/profile/:username/exp", validateExperience, async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
@@ -101,7 +69,7 @@ app.post("/:username/exp", validateExperience, async (req, res, next) => {
 });
 
 app.post(
-  "/:userName/exp/:expId/upload",
+  "/profile/:userName/exp/:expId/upload",
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
@@ -128,9 +96,9 @@ app.post(
   }
 );
 /// second one is done
-app.get("/:userName/exp/:expId", async (req, res, next) => {
+app.get("/profile/:userName/exp/:expId", async (req, res, next) => {
   try {
-    const profile = await ProfileSchema.findOne({
+    await ProfileSchema.findOne({
       username: req.params.userName,
     });
     const experince = await ExperienceSchema.findById(req.params.expId);
@@ -142,7 +110,7 @@ app.get("/:userName/exp/:expId", async (req, res, next) => {
   }
 });
 /// put is done
-app.put("/:userName/exp/:expId", async (req, res, next) => {
+app.put("/profile/:userName/exp/:expId", async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
@@ -157,7 +125,7 @@ app.put("/:userName/exp/:expId", async (req, res, next) => {
   }
 });
 
-app.delete("/:userName/exp/:expId", async (req, res, next) => {
+app.delete("/profile/:userName/exp/:expId", async (req, res, next) => {
   try {
     const deleteExperice = await ExperienceSchema.findByIdAndDelete(
       req.params.expId

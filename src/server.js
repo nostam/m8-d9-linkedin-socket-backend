@@ -1,3 +1,6 @@
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const Profile = require("./model/profiles");
 const express = require("express");
 const cors = require("cors");
 const listEndpoints = require("express-list-endpoints");
@@ -11,7 +14,6 @@ const {
   notFound,
   badRequestHandler,
 } = require("./errorHandler");
-
 const port = process.env.PORT || 3001;
 
 const whiteList =
@@ -31,9 +33,17 @@ const loggerMiddleware = (req, res, next) => {
   console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
   next();
 };
+
+passport.use(new LocalStrategy(Profile.authenticate()));
+
 app.use(cors());
 app.use(express.json());
 app.use(loggerMiddleware);
+app.use(passport.initialize());
+app.use(passport.session());
+passport.serializeUser(Profile.serializeUser());
+passport.deserializeUser(Profile.deserializeUser());
+
 // Endpoints
 
 app.use("/", servicesRoutes);
