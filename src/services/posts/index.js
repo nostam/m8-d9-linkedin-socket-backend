@@ -3,6 +3,7 @@ const PostsRouter = express.Router();
 const { validatePost } = require("../../validator");
 const { validationResult } = require("express-validator");
 const PostsModel = require("../../model/posts");
+const ProfilesModel = require("../../model/profiles");
 const { APIError } = require("../../utils");
 const {
   uploadCloudinary,
@@ -21,8 +22,11 @@ PostsRouter.route("/")
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+      const user = await ProfilesModel.find({ username: req.body.username });
+      if (user.length !== 1) throw new APIError("User not found", 404);
       const payload = {
         ...req.body,
+        user: user[0],
         image: req.body.image ? req.body.image : "https://picsum.photos/x400",
       };
       const newPost = await PostsModel(payload);
