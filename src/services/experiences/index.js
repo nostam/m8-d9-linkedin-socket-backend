@@ -1,16 +1,10 @@
 const express = require("express");
 const app = express.Router();
-const multer = require("multer");
 const { validateExperience } = require("../../validator");
-const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const ExperienceSchema = require("../../model/experiences");
 const ProfileSchema = require("../../model/profiles");
-const { validationResult } = require("express-validator");
-const requestIp = require("request-ip");
-const path = require("path");
 const { APIError } = require("../../utils");
-const { createReadStream, createWriteStream } = require("fs-extra");
 /// First one is done
 app.get("/profile/:userName/experiences", async (req, res, next) => {
   try {
