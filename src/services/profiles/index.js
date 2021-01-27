@@ -3,10 +3,50 @@ const app = express.Router();
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
-
 const { validateProfile } = require("../../validator")
+const jwt = require("jsonwebtoken")
+
+const mailgun = require("mailgun-js");
+const DOMAIN = process.env.MG_DOMAIN;
+const mg = mailgun({ apiKey: process.env.MG_APIKEY, domain: DOMAIN });
+const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL
 
 const ProfileSchema = require("../../model/profiles");
+
+app.post('/', async (req, res, next) => {
+  try {
+    Profile = await new ProfileSchema(req.body)
+    ProfileSchema.register(Profile, req.body.password, async function () {
+      await Profile.save()
+      const email = await req.body.email
+      const data = {
+        from: senderEmail,
+        to: email,
+        subject: "Hello",
+        text: `Hello '${req.body.surname}', you email has been used to create an account on linkedin. If you don't know what's going on, contact our support `
+      };
+      mg.messages().send(data);
+      res.send("profile created!")
+    });
+  } catch (err) {
+    console.log(err)
+    next(err);
+  }
+});
+
+app.post('/login', async (req, res, next) => {
+  try {
+    Profile = await ProfileSchema(req.body)
+
+    Profile.doLogin = function (req, res) {
+
+    };
+
+  } catch (err) {
+    console.log(err)
+    next(err);
+  }
+});
 
 app.get("/", async (req, res, next) => {
   try {
@@ -71,28 +111,6 @@ app.get("/:id/cv", async (req, res, next) => {
 
     doc.pipe(res);
     doc.end();
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
-
-app.post("/", validateProfile, async (req, res, next) => {
-  try {
-    const clientIp = requestIp.getClientIp(req);
-    const newProfile = new ProfileSchema(req.body);
-    var { _id } = await newProfile.save();
-    if (_id) {
-      res.status(200).send("Created! here's the id of the profile: " + _id);
-      console.log("\x1b[32m", clientIp + " created a profile. Id: " + _id);
-    } else {
-      res.send("Unknown error");
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp + " tried to create a profile but encountered an error"
-      );
-      next();
-    }
   } catch (err) {
     console.log("\x1b[31m", err);
     next(err);

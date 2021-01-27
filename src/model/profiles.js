@@ -1,3 +1,4 @@
+const passportLocalMongoose = require('passport-local-mongoose');
 const { Schema } = require("mongoose")
 const mongoose = require("mongoose")
 
@@ -16,6 +17,8 @@ const ProfileSchema = new Schema(
         timestamps: true,
     }
 )
+
+ProfileSchema.plugin(passportLocalMongoose)
 
 Profile_Schema = mongoose.model("profiles", ProfileSchema)
 
