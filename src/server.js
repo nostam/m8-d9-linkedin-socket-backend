@@ -27,10 +27,13 @@ const corsOptions = {
     }
   },
 };
-
+const loggerMiddleware = (req, res, next) => {
+  console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
+  next();
+};
 app.use(cors());
 app.use(express.json());
-
+app.use(loggerMiddleware);
 // Endpoints
 
 app.use("/", servicesRoutes);
