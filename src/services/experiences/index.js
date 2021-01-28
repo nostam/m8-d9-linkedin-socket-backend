@@ -7,7 +7,7 @@ const ProfileSchema = require("../../model/profiles");
 const { APIError } = require("../../utils");
 const { validationResult } = require("express-validator");
 /// First one is done
-app.get("/:userName/experiences", async (req, res, next) => {
+app.get("/:userName", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.findOne({
       username: req.params.userName,
@@ -44,34 +44,30 @@ app.post("/:username/experiences/CSV", async (req, res, next) => {
     next(error);
   }
 });
-app.post(
-  "/:username/experiences",
-  validateExperience,
-  async (req, res, next) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
-      const profile = await ProfileSchema.findOne({
-        username: req.params.username,
-      });
-      console.log(profile, "asdasd");
+app.post("/:username", validateExperience, async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+    const profile = await ProfileSchema.findOne({
+      username: req.params.username,
+    });
+    console.log(profile, "asdasd");
 
-      if (profile) {
-        const newExperience = { ...req.body, username: profile._id };
-        console.log(newExperience);
+    if (profile) {
+      const newExperience = { ...req.body, username: profile._id };
+      console.log(newExperience);
 
-        const myExp = new ExperienceSchema(newExperience);
-        await myExp.save();
-        res.status(201).send(myExp);
-      } else {
-        res.send("Error");
-      }
-    } catch (err) {
-      console.log("\x1b[31m", err);
-      next(err);
+      const myExp = new ExperienceSchema(newExperience);
+      await myExp.save();
+      res.status(201).send(myExp);
+    } else {
+      res.send("Error");
     }
+  } catch (err) {
+    console.log("\x1b[31m", err);
+    next(err);
   }
-);
+});
 
 app.post(
   "/:userName/experiences/:expId/upload",
