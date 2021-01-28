@@ -25,7 +25,10 @@ PostsSchema.static("getAllPosts", async function (req) {
       .skip(query.options.skip)
       .limit(query.options.limit)
       .sort(query.options.sort)
-      .populate({ path: "comments", populate: { path: "user" } });
+      .populate([
+        { path: "comments", populate: { path: "user" } },
+        { path: "user" },
+      ]);
     const payload = {
       links: query.links(`/posts`, total),
       posts,

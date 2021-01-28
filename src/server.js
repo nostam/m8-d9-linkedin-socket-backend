@@ -1,6 +1,6 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
-const Profile = require("./model/profiles")
+const Profile = require("./model/profiles");
 const express = require("express");
 const cors = require("cors");
 const listEndpoints = require("express-list-endpoints");
@@ -29,27 +29,30 @@ const corsOptions = {
     }
   },
 };
+const loggerMiddleware = (req, res, next) => {
+  console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
+  next();
+};
 
 passport.use(new LocalStrategy(Profile.authenticate()));
 
 app.use(cors());
 app.use(express.json());
-
+app.use(loggerMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(Profile.serializeUser());
 passport.deserializeUser(Profile.deserializeUser());
 
-
 // Endpoints
 
 app.use("/", servicesRoutes);
 
-// app.use(unauthorized);
-// app.use(forbidden);
-// app.use(notFound);
-// app.use(badRequestHandler);
-// app.use(catchAll);
+app.use(unauthorized);
+app.use(forbidden);
+app.use(notFound);
+app.use(badRequestHandler);
+app.use(catchAll);
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {

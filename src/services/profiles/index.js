@@ -3,49 +3,54 @@ const app = express.Router();
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
-const { validateProfile } = require("../../validator")
-const jwt = require("express-jwt")
+const { validateProfile } = require("../../validator");
+const jwt = require("express-jwt");
 
 const mailgun = require("mailgun-js");
 const DOMAIN = process.env.MG_DOMAIN;
-const mg = mailgun({ apiKey: process.env.MG_APIKEY, domain: DOMAIN });
-const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL
+const mg = mailgun({
+  apiKey: process.env.MG_APIKEY,
+  domain: process.env.MG_DOMAIN,
+});
+const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
 
-app.post('/', async (req, res, next) => {
+app.post("/", async (req, res, next) => {
   try {
-    Profile = await new ProfileSchema(req.body)
+    Profile = await new ProfileSchema(req.body);
     ProfileSchema.register(Profile, req.body.password, async function () {
-      await Profile.save()
-      const email = await req.body.email
+      await Profile.save();
+      const email = await req.body.email;
       const data = {
         from: senderEmail,
         to: email,
         subject: "Hello",
-        text: `Hello '${req.body.surname}', you email has been used to create an account on linkedin. If you don't know what's going on, contact our support `
+        text: `Hello '${req.body.surname}', you email has been used to create an account on linkedin. If you don't know what's going on, contact our support `,
       };
       mg.messages().send(data);
-      res.send("profile created!")
+      res.send("profile created!");
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     next(err);
   }
 });
 
-app.post('/login', async (req, res, next) => {
+app.post("/login", async (req, res, next) => {
   try {
   } catch (err) {
-    console.log(err)
+    console.log(err);
     next(err);
   }
 });
 
 app.get("/", async (req, res, next) => {
   try {
-    const regex = new RegExp(req.query.name, "ig")
-    const profiles = await ProfileSchema.find({ $or: [{ "name": regex }, { "surname": regex }] });
+    const regex = new RegExp(req.query.name, "ig");
+    const profiles = await ProfileSchema.find({
+      $or: [{ name: regex }, { surname: regex }],
+    });
     const clientIp = requestIp.getClientIp(req);
 
     if (profiles.length > 0) {
@@ -71,7 +76,7 @@ app.get("/", async (req, res, next) => {
 app.get("/:id", async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
-    const profile = await ProfileSchema.findById(req.params.id)
+    const profile = await ProfileSchema.findById(req.params.id);
     if (profile) {
       res.status(200).send(profile);
       console.log("\x1b[32m", clientIp + " did GET/profiles/" + req.params.id);
@@ -117,15 +122,11 @@ app.post(
   uploadCloudinary.single("image"),
   async (req, res, next) => {
     try {
-
-      const addPicture = await ProfileSchema.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: {
-            image: req.file.path,
-          },
-        }
-      );
+      const addPicture = await ProfileSchema.findByIdAndUpdate(req.params.id, {
+        $set: {
+          image: req.file.path,
+        },
+      });
       res.status(200).send(addPicture);
     } catch (err) {
       console.log(err);
@@ -157,8 +158,8 @@ app.put("/:id", validateProfile, async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-        " tried to modify a profile but encountered an error, id: " +
-        req.params.id
+          " tried to modify a profile but encountered an error, id: " +
+          req.params.id
       );
       next();
     }
@@ -183,8 +184,8 @@ app.delete("/:id", async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-        " tried to delete a profile but encountered an error, id: " +
-        req.params.id
+          " tried to delete a profile but encountered an error, id: " +
+          req.params.id
       );
       next();
     }
