@@ -8,7 +8,11 @@ const PostsSchema = new Schema(
     username: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: "profiles", required: true },
     image: { type: String },
-    comments: [{ type: Schema.Types.ObjectId, ref: "comments" }]
+    comments: [{ type: Schema.Types.ObjectId, ref: "comments" }],
+    likes: [{
+      name: String,
+      surname: String
+    }]
   },
   { timestamps: true }
 );

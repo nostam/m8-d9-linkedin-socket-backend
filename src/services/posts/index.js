@@ -84,4 +84,50 @@ PostsRouter.route("/:postId")
     }
   });
 
+PostsRouter.post("/:postId/:userId/like", async (req, res, next) => {
+  try {
+    const profile = await ProfilesModel.findById(req.params.userId)
+    const modifiedPost = await PostsModel.findByIdAndUpdate(req.params.postId,
+      {
+        $push: {
+          likes: [{
+            name: profile.name,
+            surname: profile.surname
+          }]
+        }
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+    res.send(modifiedPost)
+
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+})
+PostsRouter.delete("/:postId/:likeId", async (req, res, next) => {
+  try {
+    const posts = await PostsModel.findByIdAndUpdate(req.params.postId,
+      {
+        $pull: {
+          likes: {
+            _id: req.params.likeId
+          }
+        }
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    )
+    res.send(posts)
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
 module.exports = PostsRouter;
