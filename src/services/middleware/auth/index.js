@@ -40,19 +40,6 @@ const login = async (req, res, next) => {
 
 const checkToken = async (req, res, next) => {
 
-    /**
-     * 
-     *  get header 
-     *  extract authorization
-     *  extract token
-     *  decode token
-     *  find user by username, password
-     *  if valid
-     *      send user
-     *  else error
-     * 
-     */
-
     try {
         if (req.headers.authorization) {
 

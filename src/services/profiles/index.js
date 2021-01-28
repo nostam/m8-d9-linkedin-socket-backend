@@ -36,8 +36,6 @@ app.post("/", async (req, res, next) => {
 
 app.post("/login", auth.login, auth.generateToken);
 
-//app.post("/login", auth.login);
-
 app.get("/", async (req, res, next) => {
   try {
     const regex = new RegExp(req.query.name, "ig");
@@ -66,12 +64,7 @@ app.get("/", async (req, res, next) => {
   }
 });
 
-
-
-
-/**
- * 
- * app.get("/:id", async (req, res, next) => {
+app.get("/:id", async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
     const profile = await ProfileSchema.findById(req.params.id);
@@ -92,7 +85,6 @@ app.get("/", async (req, res, next) => {
     next(err);
   }
 });
- */
 
 app.get("/:id/cv", async (req, res, next) => {
   try {
