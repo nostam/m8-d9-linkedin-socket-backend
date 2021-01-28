@@ -5,7 +5,7 @@ const PDFDocument = require("pdfkit");
 const requestIp = require("request-ip");
 const { validateProfile } = require("../../validator");
 const jwt = require("express-jwt");
-
+const auth = require("../middleware/auth")
 const mailgun = require("mailgun-js");
 const DOMAIN = process.env.MG_DOMAIN;
 const mg = mailgun({
@@ -16,34 +16,27 @@ const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
 
-app.post("/", async (req, res, next) => {
-  try {
-    Profile = await new ProfileSchema(req.body);
-    ProfileSchema.register(Profile, req.body.password, async function () {
-      await Profile.save();
-      const email = await req.body.email;
-      const data = {
-        from: senderEmail,
-        to: email,
-        subject: "Hello",
-        text: `Hello '${req.body.surname}', you email has been used to create an account on linkedin. If you don't know what's going on, contact our support `,
-      };
-      mg.messages().send(data);
-      res.send("profile created!");
-    });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+
+
+
+app.get("/me", auth.checkToken, (req, res) => {
+  res.send(req.user)
 });
 
-app.post("/login", async (req, res, next) => {
+app.post("/", async (req, res, next) => {
   try {
+    const profile = await new ProfileSchema(req.body).save();
+    req.user = profile;
+    next()
   } catch (err) {
     console.log(err);
     next(err);
   }
-});
+}, auth.generateToken);
+
+app.post("/login", auth.login, auth.generateToken);
+
+//app.post("/login", auth.login);
 
 app.get("/", async (req, res, next) => {
   try {
@@ -73,7 +66,12 @@ app.get("/", async (req, res, next) => {
   }
 });
 
-app.get("/:id", async (req, res, next) => {
+
+
+
+/**
+ * 
+ * app.get("/:id", async (req, res, next) => {
   try {
     const clientIp = requestIp.getClientIp(req);
     const profile = await ProfileSchema.findById(req.params.id);
@@ -94,6 +92,7 @@ app.get("/:id", async (req, res, next) => {
     next(err);
   }
 });
+ */
 
 app.get("/:id/cv", async (req, res, next) => {
   try {
@@ -158,8 +157,8 @@ app.put("/:id", validateProfile, async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-          " tried to modify a profile but encountered an error, id: " +
-          req.params.id
+        " tried to modify a profile but encountered an error, id: " +
+        req.params.id
       );
       next();
     }
@@ -184,8 +183,8 @@ app.delete("/:id", async (req, res, next) => {
       console.log(
         "\x1b[33m%s\x1b[0m",
         clientIp +
-          " tried to delete a profile but encountered an error, id: " +
-          req.params.id
+        " tried to delete a profile but encountered an error, id: " +
+        req.params.id
       );
       next();
     }

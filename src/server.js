@@ -34,15 +34,10 @@ const loggerMiddleware = (req, res, next) => {
   next();
 };
 
-passport.use(new LocalStrategy(Profile.authenticate()));
 
 app.use(cors());
 app.use(express.json());
 app.use(loggerMiddleware);
-app.use(passport.initialize());
-app.use(passport.session());
-passport.serializeUser(Profile.serializeUser());
-passport.deserializeUser(Profile.deserializeUser());
 
 // Endpoints
 
@@ -53,6 +48,7 @@ app.use(forbidden);
 app.use(notFound);
 app.use(badRequestHandler);
 app.use(catchAll);
+
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {
