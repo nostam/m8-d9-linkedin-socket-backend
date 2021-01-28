@@ -31,10 +31,11 @@ const corsOptions = {
   },
 };
 
-const clientIp = getClientIp(req);
 const loggerMiddleware = (req, res, next) => {
   console.log(
-    `Logged ${"\x1b[32m"}${requestIp} ${req.url} ${req.method} -- ${new Date()}`
+    `Logged ${"\x1b[34m"} ${getClientIp(req)} ${"\x1b[32m"}${req.url} ${
+      req.method
+    } ${"\x1B[0m"}${new Date()}`
   );
   next();
 };

@@ -108,7 +108,7 @@ app
       next(err);
     }
   })
-  .put("/:id", validateProfile, async (req, res, next) => {
+  .put(validateProfile, async (req, res, next) => {
     try {
       const modifiedProfile = await ProfileSchema.findByIdAndUpdate(
         req.params.id,
@@ -129,7 +129,7 @@ app
       next(err);
     }
   })
-  .delete("/:id", async (req, res, next) => {
+  .delete(async (req, res, next) => {
     try {
       const DeletedProfile = await ProfileSchema.findByIdAndDelete(
         req.params.id
