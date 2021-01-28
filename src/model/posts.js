@@ -11,8 +11,9 @@ const PostsSchema = new Schema(
     comments: [{ type: Schema.Types.ObjectId, ref: "comments" }],
     likes: [
       {
-        name: String,
-        surname: String,
+        _id: { type: String, required: true },
+        name: { type: String, required: true },
+        surname: { type: String, required: true },
       },
     ],
   },
