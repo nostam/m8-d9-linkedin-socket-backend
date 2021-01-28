@@ -27,7 +27,6 @@ PostsRouter.route("/")
       const payload = {
         ...req.body,
         user: user[0],
-        image: req.body.image ? req.body.image : "https://picsum.photos/400",
       };
       const newPost = await PostsModel(payload);
       const { _id } = await newPost.save();
@@ -40,8 +39,10 @@ PostsRouter.route("/")
 PostsRouter.route("/:postId")
   .get(async (req, res, next) => {
     try {
-      const payload = await PostsModel.findById(req.params.postId)
-        .populate(["comments", "user"]);
+      const payload = await PostsModel.findById(req.params.postId).populate([
+        "comments",
+        "user",
+      ]);
       res.send(payload);
     } catch (error) {
       next(error);
@@ -86,44 +87,47 @@ PostsRouter.route("/:postId")
 
 PostsRouter.post("/:postId/:userId/like", async (req, res, next) => {
   try {
-    const profile = await ProfilesModel.findById(req.params.userId)
-    const modifiedPost = await PostsModel.findByIdAndUpdate(req.params.postId,
+    const profile = await ProfilesModel.findById(req.params.userId);
+    const modifiedPost = await PostsModel.findByIdAndUpdate(
+      req.params.postId,
       {
         $push: {
-          likes: [{
-            name: profile.name,
-            surname: profile.surname
-          }]
-        }
+          likes: [
+            {
+              name: profile.name,
+              surname: profile.surname,
+            },
+          ],
+        },
       },
       {
         runValidators: true,
         new: true,
       }
     );
-    res.send(modifiedPost)
-
+    res.send(modifiedPost);
   } catch (err) {
     console.log(err);
     next(err);
   }
-})
+});
 PostsRouter.delete("/:postId/:likeId", async (req, res, next) => {
   try {
-    const posts = await PostsModel.findByIdAndUpdate(req.params.postId,
+    const posts = await PostsModel.findByIdAndUpdate(
+      req.params.postId,
       {
         $pull: {
           likes: {
-            _id: req.params.likeId
-          }
-        }
+            _id: req.params.likeId,
+          },
+        },
       },
       {
         runValidators: true,
         new: true,
       }
-    )
-    res.send(posts)
+    );
+    res.send(posts);
   } catch (err) {
     console.log(err);
     next(err);
