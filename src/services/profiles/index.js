@@ -2,10 +2,9 @@ const express = require("express");
 const app = express.Router();
 const { uploadCloudinary } = require("../../utils/cloudinary");
 const PDFDocument = require("pdfkit");
-const requestIp = require("request-ip");
 const { validateProfile } = require("../../validator");
 const jwt = require("express-jwt");
-const auth = require("../middleware/auth")
+const auth = require("../middleware/auth");
 const mailgun = require("mailgun-js");
 const DOMAIN = process.env.MG_DOMAIN;
 const mg = mailgun({
@@ -16,75 +15,42 @@ const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
 
-
-
-
 app.get("/me", auth.checkToken, (req, res) => {
-  res.send(req.user)
+  res.send(req.user);
 });
-
-app.post("/", async (req, res, next) => {
-  try {
-    const profile = await new ProfileSchema(req.body).save();
-    req.user = profile;
-    next()
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
-}, auth.generateToken);
-
 app.post("/login", auth.login, auth.generateToken);
 
-app.get("/", async (req, res, next) => {
-  try {
-    const regex = new RegExp(req.query.name, "ig");
-    const profiles = await ProfileSchema.find({
-      $or: [{ name: regex }, { surname: regex }],
-    });
-    const clientIp = requestIp.getClientIp(req);
-
-    if (profiles.length > 0) {
-      res.status(200).send(profiles);
-      console.log("\x1b[32m", clientIp + " did GET/profiles");
-    } else {
-      res
-        .status(404)
-        .send(
-          "404, not found. Could it be that there aren't any profiles in the databse?"
-        );
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp + " did GET/profiles but encountered 404"
-      );
+app
+  .route("/")
+  .post(async (req, res, next) => {
+    try {
+      const profile = await new ProfileSchema(req.body).save();
+      req.user = profile;
+      next();
+    } catch (err) {
+      next(err);
     }
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
+  }, auth.generateToken)
+  .get(async (req, res, next) => {
+    try {
+      const regex = new RegExp(req.query.name, "ig");
+      const profiles = await ProfileSchema.find({
+        $or: [{ name: regex }, { surname: regex }],
+      });
 
-app.get("/:id", async (req, res, next) => {
-  try {
-    const clientIp = requestIp.getClientIp(req);
-    const profile = await ProfileSchema.findById(req.params.id);
-    if (profile) {
-      res.status(200).send(profile);
-      console.log("\x1b[32m", clientIp + " did GET/profiles/" + req.params.id);
-    } else {
-      res
-        .status(404)
-        .send("404, not found. Wrong id or the elemnt doesn't exist?");
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp + " did GET/profiles/" + req.params.id + " but encountered 404"
-      );
+      if (profiles.length > 0) {
+        res.status(200).send(profiles);
+      } else {
+        res
+          .status(404)
+          .send(
+            "404, not found. Could it be that there aren't any profiles in the databse?"
+          );
+      }
+    } catch (err) {
+      next(err);
     }
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
+  });
 
 app.get("/:id/cv", async (req, res, next) => {
   try {
@@ -103,7 +69,6 @@ app.get("/:id/cv", async (req, res, next) => {
     doc.pipe(res);
     doc.end();
   } catch (err) {
-    console.log("\x1b[31m", err);
     next(err);
   }
 });
@@ -126,64 +91,59 @@ app.post(
   }
 );
 
-app.put("/:id", validateProfile, async (req, res, next) => {
-  try {
-    const clientIp = requestIp.getClientIp(req);
-    const modifiedProfile = await ProfileSchema.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        runValidators: true,
-        new: true,
+app
+  .route("/:id")
+  .get(async (req, res, next) => {
+    try {
+      const profile = await ProfileSchema.findById(req.params.id);
+      if (profile) {
+        res.status(200).send(profile);
+      } else {
+        res
+          .status(404)
+          .send("404, not found. Wrong id or the elemnt doesn't exist?");
       }
-    );
-    console.log();
-    if (modifiedProfile) {
-      res.status(200).send("profile changed, new id:" + modifiedProfile._id);
-      console.log(
-        "\x1b[32m",
-        clientIp + " modified a profile, id: " + req.params.id
+    } catch (err) {
+      console.log("\x1b[31m", err);
+      next(err);
+    }
+  })
+  .put("/:id", validateProfile, async (req, res, next) => {
+    try {
+      const modifiedProfile = await ProfileSchema.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          runValidators: true,
+          new: true,
+        }
       );
-    } else {
-      res.send("Unknown error, maybe you mistaken the id?");
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp +
-        " tried to modify a profile but encountered an error, id: " +
+      if (modifiedProfile) {
+        res.status(200).send("profile changed, new id:" + modifiedProfile._id);
+      } else {
+        res.status(404).send("Unknown error, maybe you mistaken the id?");
+        next();
+      }
+    } catch (err) {
+      console.log("\x1b[31m", err);
+      next(err);
+    }
+  })
+  .delete("/:id", async (req, res, next) => {
+    try {
+      const DeletedProfile = await ProfileSchema.findByIdAndDelete(
         req.params.id
       );
-      next();
+      if (DeletedProfile) {
+        res.status(200).send("profile deleted!");
+      } else {
+        res.status(400).send("Unknown error, maybe you mistaken the id?");
+        next();
+      }
+    } catch (err) {
+      console.log("\x1b[31m", err);
+      next(err);
     }
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
-
-app.delete("/:id", async (req, res, next) => {
-  try {
-    const clientIp = requestIp.getClientIp(req);
-    const DeletedProfile = await ProfileSchema.findByIdAndDelete(req.params.id);
-    if (DeletedProfile) {
-      res.status(200).send("profile deleted!");
-      console.log(
-        "\x1b[32m",
-        clientIp + " deleted a profile, id: " + req.params.id
-      );
-    } else {
-      res.send("Unknown error, maybe you mistaken the id?");
-      console.log(
-        "\x1b[33m%s\x1b[0m",
-        clientIp +
-        " tried to delete a profile but encountered an error, id: " +
-        req.params.id
-      );
-      next();
-    }
-  } catch (err) {
-    console.log("\x1b[31m", err);
-    next(err);
-  }
-});
+  });
 
 module.exports = app;

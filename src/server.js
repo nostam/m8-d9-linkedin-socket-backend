@@ -8,13 +8,14 @@ const mongoose = require("mongoose");
 const app = express();
 const servicesRoutes = require("./allRoutes");
 const {
-  catchAll,
-  unauthorized,
-  forbidden,
-  notFound,
+  notFoundHandler,
+  unauthorizedHandler,
+  forbiddenHandler,
+  catchAllHandler,
   badRequestHandler,
 } = require("./errorHandler");
 const port = process.env.PORT || 3001;
+const { getClientIp } = require("request-ip");
 
 const whiteList =
   process.env.NODE_ENV === "production"
@@ -29,11 +30,14 @@ const corsOptions = {
     }
   },
 };
+
+const clientIp = getClientIp(req);
 const loggerMiddleware = (req, res, next) => {
-  console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
+  console.log(
+    `Logged ${"\x1b[32m"}${requestIp} ${req.url} ${req.method} -- ${new Date()}`
+  );
   next();
 };
-
 
 app.use(cors());
 app.use(express.json());
@@ -43,12 +47,11 @@ app.use(loggerMiddleware);
 
 app.use("/", servicesRoutes);
 
-app.use(unauthorized);
-app.use(forbidden);
-app.use(notFound);
+app.use(unauthorizedHandler);
+app.use(forbiddenHandler);
+app.use(notFoundHandler);
 app.use(badRequestHandler);
-app.use(catchAll);
-
+app.use(catchAllHandler);
 
 mongoose
   .connect(process.env.MONGO_CONNECTION, {
