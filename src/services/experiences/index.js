@@ -99,9 +99,9 @@ app.post(
 /// second one is done
 app.get("/:userName/experiences/:expId", async (req, res, next) => {
   try {
-    await ProfileSchema.findOne({
-      username: req.params.userName,
-    });
+    // await ProfileSchema.findOne({
+    //   username: req.params.userName,
+    // });
     const experince = await ExperienceSchema.findById(req.params.expId);
     console.log(experince);
     res.send(experince);
@@ -115,11 +115,15 @@ app.put("/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
-    const modifed = await ExperienceSchema.findByIdAndUpdate(req.params.expId, {
-      ...req.body,
-    });
-    console.log(modifed);
-    res.send(modifed);
+    const modified = await ExperienceSchema.findByIdAndUpdate(
+      req.params.expId,
+      {
+        ...req.body,
+      }
+    );
+    console.log(modified);
+    if (!isNaN(modified)) throw new APIError("modified fail", 500);
+    res.send(modified);
   } catch (err) {
     console.log("\x1b[31m", err);
     next(err);
