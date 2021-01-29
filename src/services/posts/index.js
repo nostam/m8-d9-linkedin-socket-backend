@@ -69,10 +69,11 @@ PostsRouter.route("/:postId")
       next(error);
     }
   })
-  .post(uploadCloudinary.single("image"), async (req, res, next) => {
+  .post(uploadCloudinary.single("post"), async (req, res, next) => {
     let imageUrl;
     if (req.file && req.file.path) imageUrl = req.file.path;
     try {
+      console.log(req.body, req.file);
       const { _doc } = await PostsModel.findById(req.params.postId);
       const payload = { ..._doc, image: imageUrl };
       const _id = await PostsModel.updatePostByPostId(
