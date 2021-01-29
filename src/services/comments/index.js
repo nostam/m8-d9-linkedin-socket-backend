@@ -4,6 +4,7 @@ const requestIp = require("request-ip");
 
 const { validateComment } = require("../../validator")
 
+const PostsModel = require("../../model/posts")
 const CommentSchema = require("../../model/comments");
 
 app.get("/", async (req, res, next) => {
@@ -53,20 +54,27 @@ app.get("/:id", async (req, res, next) => {
     }
 });
 
-app.post("/", validateComment, async (req, res, next) => {
+app.post("/:postId/:userId", validateComment, async (req, res, next) => {
     try {
-        const clientIp = requestIp.getClientIp(req);
-        const newComment = new CommentSchema(req.body);
-        var { _id } = await newComment.save();
+        const newComment = new CommentSchema({
+            user: req.params.userId,
+            ...req.body
+        });
+        const { _id } = await newComment.save();
+        await PostsModel.findByIdAndUpdate(
+            req.params.postId,
+            {
+                $push: {
+                    comments: [{
+                        _id: _id
+                    }]
+                }
+            })
+
         if (_id) {
             res.status(200).send("Created! here's the id of the comment: " + _id);
-            console.log("\x1b[32m", clientIp + " created a comment. Id: " + _id);
         } else {
             res.send("Unknown error");
-            console.log(
-                "\x1b[33m%s\x1b[0m",
-                clientIp + " tried to create a comment but encountered an error"
-            );
             next();
         }
     } catch (err) {
