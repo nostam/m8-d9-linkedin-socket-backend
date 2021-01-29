@@ -35,13 +35,25 @@ app
   .route("/")
   .post(async (req, res, next) => {
     try {
-      const profile = await new ProfileSchema(req.body).save();
-      req.user = profile;
-      next();
+      const username = await ProfileSchema.findOne({ username: req.body.username });
+      const email = await ProfileSchema.findOne({ email: req.body.email });
+
+      if (username) {
+        res.send("User already exists!")
+        next()
+      } else if (email) {
+        res.send("Email already exists!")
+        next()
+      } else {
+        const profile = await new ProfileSchema(req.body).save();
+        req.user = profile;
+        next();
+      }
     } catch (err) {
       next(err);
     }
   }, auth.generateToken)
+
   .get(async (req, res, next) => {
     try {
       const regex = new RegExp(req.query.name, "ig");
