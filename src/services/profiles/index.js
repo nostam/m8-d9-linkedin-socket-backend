@@ -17,11 +17,9 @@ const ProfileSchema = require("../../model/profiles");
 
 app.get("/rng", async (req, res, next) => {
   try {
-    for (let i = 0; i < 6; i++) {
-      const profile = await ProfileSchema.find();
-      const profileNum = Math.floor(Math.random() * profile.length);
-      res.send(profile[profileNum]);
-    }
+    const profile = await ProfileSchema.find();
+    const profileNum = Math.floor(Math.random() * profile.length);
+    res.send(profile[profileNum]);
   } catch (err) {
     console.log("\x1b[31m", err);
     next(err);
