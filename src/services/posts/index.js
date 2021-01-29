@@ -89,6 +89,7 @@ PostsRouter.route("/:postId")
 PostsRouter.route("/:postId/:userId/like")
   .post(async (req, res, next) => {
     try {
+      console.log(req.query);
       const profile = await ProfilesModel.findById(req.params.userId);
       const modifiedPost = await PostsModel.findByIdAndUpdate(
         req.params.postId,
