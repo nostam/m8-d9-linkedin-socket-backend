@@ -7,12 +7,15 @@ const PostsSchema = new Schema(
     text: { type: String, required: true },
     username: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: "profiles", required: true },
-    image: { type: String },
+    image: { type: String, default: "https://picsum.photos/400" },
     comments: [{ type: Schema.Types.ObjectId, ref: "comments" }],
-    likes: [{
-      name: String,
-      surname: String
-    }]
+    likes: [
+      {
+        _id: { type: String, required: true },
+        name: { type: String, required: true },
+        surname: { type: String, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -48,7 +51,7 @@ PostsSchema.static("updatePostByPostId", async function (postId, body) {
       {
         $set: {
           text: body.text,
-          image: body.image ? body.image : "https://picsum.photos/x400",
+          image: body.image ? body.image : "https://picsum.photos/400",
         },
       },
       { runValidators: true, new: true }

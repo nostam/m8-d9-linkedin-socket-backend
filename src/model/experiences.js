@@ -10,7 +10,7 @@ const ExperienceSchema = new Schema(
     description: { type: String, required: true },
     area: { type: String, required: true },
 
-    image: { type: String, default: "https://picsum.photos/x400" },
+    image: { type: String, default: "https://picsum.photos/400" },
     username: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "profiles",
