@@ -5,7 +5,6 @@ const { APIError } = require("../utils");
 const PostsSchema = new Schema(
   {
     text: { type: String, required: true },
-    username: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: "profiles", required: true },
     image: { type: String, default: "https://picsum.photos/400" },
     comments: [{ type: Schema.Types.ObjectId, ref: "comments" }],
