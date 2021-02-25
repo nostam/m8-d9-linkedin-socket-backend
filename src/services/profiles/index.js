@@ -30,7 +30,41 @@ app.get("/rng", async (req, res, next) => {
 app.get("/me", auth.checkToken, (req, res) => {
   res.send(req.user);
 });
-app.post("/login", auth.login, auth.generateToken);
+// app.post("/login", auth.login, auth.generateToken);
+
+app.post("/register", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) throw new Error("Provide credentials");
+
+    const user = new ProfileSchema(req.body);
+    const { _id } = await user.save();
+    res.status(201).send({ _id });
+  } catch (error) {
+    res.status(400).send({
+      message: error.message,
+      errorCode: "wrong_credentials",
+    });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) throw new Error("Provide credentials");
+
+    const user = await ProfileSchema.findByCredentials(username, password);
+    const { accessToken, refreshToken } = await authenticate(user);
+
+    if (!user) res.status(400).send({ message: "No username/password match" });
+    else res.send({ accessToken, refreshToken });
+  } catch (error) {
+    res.status(401).send({
+      message: error.message,
+      errorCode: "wrong_credentials",
+    });
+  }
+});
 
 app
   .route("/")
