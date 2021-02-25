@@ -16,7 +16,7 @@ const createSocketServer = (server) => {
   io.on("connection", (socket) => {
     console.log(`New socket connection --> ${socket.id}`);
 
-    socket.on("joinRoom", authorize, async (data) => {
+    socket.on("joinRoom", async (data) => {
       try {
         // add user to specified room (in mongo)
         const { username, room } = await addUserToRoom({
@@ -43,6 +43,11 @@ const createSocketServer = (server) => {
       }
     }); // joining chat room
 
+    //TODO: uses room to send private message
+    //TODO: also for private group, need another schema to keep track of rooms name which will be uniqId
+    socket.on("privateMessage", async ({ from, to, text }) => {
+      // const user = await user
+    });
     socket.on("sendMessage", async ({ room, message }) => {
       // when a client sends a message
 
