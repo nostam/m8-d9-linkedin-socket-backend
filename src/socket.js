@@ -8,13 +8,15 @@ const {
 } = require("./utils/users");
 const addMessage = require("./utils/messages");
 
+const { authorize } = require("../src/services/auth/middlewares");
+
 const createSocketServer = (server) => {
   const io = socketio(server);
 
   io.on("connection", (socket) => {
     console.log(`New socket connection --> ${socket.id}`);
 
-    socket.on("joinRoom", async (data) => {
+    socket.on("joinRoom", authorize, async (data) => {
       try {
         // add user to specified room (in mongo)
         const { username, room } = await addUserToRoom({
