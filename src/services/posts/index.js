@@ -2,8 +2,8 @@ const express = require("express");
 const PostsRouter = express.Router();
 const { validatePost } = require("../../validator");
 const { validationResult } = require("express-validator");
-const PostsModel = require("../../model/posts");
-const ProfilesModel = require("../../model/profiles");
+const PostsModel = require("../../models/posts");
+const ProfilesModel = require("../../models/profiles");
 const { APIError } = require("../../utils");
 const {
   uploadCloudinary,
@@ -22,9 +22,9 @@ PostsRouter.route("/")
   .post(validatePost, async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+      if (!errors.isEmpty()) throw new APIError(400, errors.array());
       const user = await ProfilesModel.find({ username: req.body.username });
-      if (user.length !== 1) throw new APIError("User not found", 404);
+      if (user.length !== 1) throw new APIError(404, "User not found");
       const payload = {
         ...req.body,
         user: user[0],
@@ -52,7 +52,7 @@ PostsRouter.route("/:postId")
   .put(validatePost, async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+      if (!errors.isEmpty()) throw new APIError(404, errors.array());
       const _id = await PostsModel.updatePostByPostId(
         req.params.postId,
         req.body
@@ -87,7 +87,6 @@ PostsRouter.route("/:postId")
     }
   });
 
-
 PostsRouter.post("/:postId/:userId/like", async (req, res, next) => {
   try {
     const modifiedPost = await PostsModel.findByIdAndUpdate(
@@ -98,7 +97,7 @@ PostsRouter.post("/:postId/:userId/like", async (req, res, next) => {
             {
               _id: req.params.userId,
               name: req.body.name,
-              surname: req.body.surname
+              surname: req.body.surname,
             },
           ],
         },

@@ -1,5 +1,5 @@
 const tokenGenerator = require("../../../utils/token");
-const Profile = require("../../../model/profiles");
+const Profile = require("../../../models/profiles");
 const md5 = require("md5");
 const { APIError } = require("../../../utils");
 const generateToken = (req, res) => {

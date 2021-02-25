@@ -2,8 +2,8 @@ const express = require("express");
 const app = express.Router();
 const { validateExperience } = require("../../validator");
 const { uploadCloudinary } = require("../../utils/cloudinary");
-const ExperienceSchema = require("../../model/experiences");
-const ProfileSchema = require("../../model/profiles");
+const ExperienceSchema = require("../../models/experiences");
+const ProfileSchema = require("../../models/profiles");
 const { APIError } = require("../../utils");
 const { validationResult } = require("express-validator");
 /// First one is done
@@ -46,7 +46,7 @@ app.post("/:username/experiences/CSV", async (req, res, next) => {
 app.post("/:username", validateExperience, async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+    if (!errors.isEmpty()) throw new APIError(404, errors.array());
     const profile = await ProfileSchema.findOne({
       username: req.params.username,
     });
@@ -113,7 +113,7 @@ app.get("/:userName/experiences/:expId", async (req, res, next) => {
 app.put("/:userName/experiences/:expId", async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) throw new APIError(errors.array(), 404);
+    if (!errors.isEmpty()) throw new APIError(404, errors.array());
     const modified = await ExperienceSchema.findByIdAndUpdate(
       req.params.expId,
       {
@@ -121,7 +121,7 @@ app.put("/:userName/experiences/:expId", async (req, res, next) => {
       }
     );
     console.log(modified);
-    if (!isNaN(modified)) throw new APIError("modified fail", 500);
+    if (!isNaN(modified)) throw new APIError(500, "modified fail");
     res.send(modified);
   } catch (err) {
     console.log("\x1b[31m", err);

@@ -1,22 +1,20 @@
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const Profile = require("./model/profiles");
+const Profile = require("./models/profiles");
 const express = require("express");
 const cors = require("cors");
-const listEndpoints = require("express-list-endpoints");
+// const listEndpoints = require("express-list-endpoints");
 const mongoose = require("mongoose");
-const app = express();
-const servicesRoutes = require("./allRoutes");
-const {
-  notFoundHandler,
-  unauthorizedHandler,
-  forbiddenHandler,
-  catchAllHandler,
-  badRequestHandler,
-} = require("./errorHandler");
-const port = process.env.PORT || 3001;
-const { getClientIp } = require("request-ip");
+const http = require("http");
 
+const app = express();
+const createSocketServer = require("./socket");
+const httpServer = http.createServer(app);
+createSocketServer(httpServer);
+
+const servicesRoutes = require("./allRoutes");
+const { httpErrorHandler } = require("./utils/index");
+
+const port = process.env.PORT || 3001;
 const whiteList =
   process.env.NODE_ENV === "production"
     ? [process.env.FE_URL_PROD]
@@ -32,11 +30,7 @@ const corsOptions = {
 };
 
 const loggerMiddleware = (req, res, next) => {
-  console.log(
-    `Logged ${"\x1b[34m"} ${getClientIp(req)} ${"\x1b[32m"}${req.url} ${
-      req.method
-    } ${"\x1B[0m"}${new Date()}`
-  );
+  console.log(`${req.method} ${req.url} ${new Date()}`);
   next();
 };
 
@@ -48,21 +42,18 @@ app.use(loggerMiddleware);
 
 app.use("/", servicesRoutes);
 
-app.use(unauthorizedHandler);
-app.use(forbiddenHandler);
-app.use(notFoundHandler);
-app.use(badRequestHandler);
-app.use(catchAllHandler);
+app.use(httpErrorHandler);
 
 mongoose
-  .connect(process.env.MONGO_CONNECTION, {
+  .connect(process.env.MONGO_CONNECTION + "/linkedin", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
+    useCreateIndex: true,
   })
   .then(() =>
-    app.listen(port, () => {
-      console.log("\x1b[34m", "Running on port", port, "\x1b[37m");
+    httpServer.listen(port, () => {
+      console.log("Running on port", port);
     })
   )
   .catch((err) => console.log(err));

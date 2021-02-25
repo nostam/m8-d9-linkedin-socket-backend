@@ -13,7 +13,7 @@ const mg = mailgun({
 });
 const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
-const ProfileSchema = require("../../model/profiles");
+const ProfileSchema = require("../../models/profiles");
 
 //TODO to be fixed
 app.get("/rng", async (req, res, next) => {

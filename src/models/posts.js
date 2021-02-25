@@ -39,7 +39,7 @@ PostsSchema.static("getAllPosts", async function (req) {
   } catch (error) {
     console.log(error);
     return error;
-    throw new APIError(error);
+    throw new APIError(500, error);
   }
 });
 
@@ -58,7 +58,7 @@ PostsSchema.static("updatePostByPostId", async function (postId, body) {
     const { _id } = await updatePost.save();
     return _id;
   } catch (error) {
-    throw new APIError(error);
+    throw new APIError(500, error);
   }
 });
 
