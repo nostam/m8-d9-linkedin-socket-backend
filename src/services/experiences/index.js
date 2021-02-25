@@ -12,11 +12,10 @@ app.get("/:userName", async (req, res, next) => {
     const profile = await ProfileSchema.findOne({
       username: req.params.userName,
     });
+    //TODO when /user/me exp will fetch a null id
     const experince = await ExperienceSchema.find({
       username: profile._id,
     }).populate("username");
-    console.log(req.params.userName);
-
     res.send(experince);
   } catch (err) {
     console.log("\x1b[31m", err);

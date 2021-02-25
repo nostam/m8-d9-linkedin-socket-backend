@@ -15,6 +15,7 @@ const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../model/profiles");
 
+//TODO to be fixed
 app.get("/rng", async (req, res, next) => {
   try {
     const profile = await ProfileSchema.find();
@@ -35,15 +36,17 @@ app
   .route("/")
   .post(async (req, res, next) => {
     try {
-      const username = await ProfileSchema.findOne({ username: req.body.username });
+      const username = await ProfileSchema.findOne({
+        username: req.body.username,
+      });
       const email = await ProfileSchema.findOne({ email: req.body.email });
 
       if (username) {
-        res.send("User already exists!")
-        next()
+        res.send("User already exists!");
+        next();
       } else if (email) {
-        res.send("Email already exists!")
-        next()
+        res.send("Email already exists!");
+        next();
       } else {
         const profile = await new ProfileSchema(req.body).save();
         req.user = profile;

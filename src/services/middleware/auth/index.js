@@ -55,7 +55,6 @@ const checkToken = async (req, res, next) => {
             .send({ message: "Username or password is not correct!" });
         } else {
           req.user = user;
-          console.log("here");
           next();
         }
       } else {
