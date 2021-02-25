@@ -5,4 +5,4 @@ const RoomSchema = new Schema({
   members: [{ username: String, socketId: String }],
 });
 
-module.exports = model("Room", RoomSchema);
+module.exports = model("rooms", RoomSchema);

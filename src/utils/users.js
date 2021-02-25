@@ -2,6 +2,16 @@ const RoomModel = require("../models/rooms");
 
 const addUserToRoom = async ({ username, socketId, room }) => {
   try {
+    const findRoom = await RoomModel.findOne({ name: room });
+    if (!findRoom) {
+      const newRoom = new RoomModel({
+        name: room,
+        members: [{ username, socketId }],
+      });
+      await newRoom.save();
+      return { username, room };
+    }
+
     const user = await RoomModel.findOne({
       name: room,
       "members.username": username,
@@ -30,6 +40,7 @@ const addUserToRoom = async ({ username, socketId, room }) => {
 const getUsersInRoom = async (roomName) => {
   try {
     const room = await RoomModel.findOne({ name: roomName });
+    console.log(roomName, room);
     return room.members;
   } catch (error) {
     console.log(error);
