@@ -14,6 +14,7 @@ const mg = mailgun({
 const senderEmail = "Mailgun Sandbox" + process.env.MG_EMAIL;
 
 const ProfileSchema = require("../../models/profiles");
+const { authenticate } = require("../auth");
 
 //TODO to be fixed
 app.get("/rng", async (req, res, next) => {
@@ -90,7 +91,6 @@ app
       next(err);
     }
   }, auth.generateToken)
-
   .get(async (req, res, next) => {
     try {
       const regex = new RegExp(req.query.name, "ig");

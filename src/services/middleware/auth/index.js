@@ -2,6 +2,10 @@ const tokenGenerator = require("../../../utils/token");
 const Profile = require("../../../models/profiles");
 const md5 = require("md5");
 const { APIError } = require("../../../utils");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const generateToken = (req, res) => {
   try {
     const { username, password } = req.user;
@@ -39,29 +43,16 @@ const checkToken = async (req, res, next) => {
     if (req.headers.authorization) {
       const { authorization } = req.headers;
       const [method, token] = authorization.split(" ");
-
-      if (method === "Basic" && token.trim().length > 0) {
-        const decodedToken = Buffer.from(token, "base64").toString();
-        const [username, password] = decodedToken.split(":");
-
-        const user = await Profile.findOne(
-          { $or: [{ username }, { email: username }], password: md5(password) },
-          { password: 0 }
-        );
-
-        if (!user) {
-          res
-            .status(401)
-            .send({ message: "Username or password is not correct!" });
-        } else {
-          req.user = user;
-          next();
-        }
+      const { _id } = await jwt.verify(token, JWT_SECRET);
+      const user = await Profile.findById(_id);
+      if (!user) {
+        res
+          .status(401)
+          .send({ message: "Username or password is not correct!" });
       } else {
-        res.status(400).send({ message: "authorization header is malformed" });
+        req.user = user;
+        next();
       }
-    } else {
-      res.status(400).send({ message: "authorization is not in header!" });
     }
   } catch (e) {
     res.status(500).send({ message: e.message });

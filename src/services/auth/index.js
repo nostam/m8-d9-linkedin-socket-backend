@@ -2,18 +2,6 @@ const jwt = require("jsonwebtoken");
 const UserModel = require("../../models/profiles");
 const { APIError } = require("../../utils");
 
-const authenticate = async (user) => {
-  try {
-    const accessToken = await generateJWT({ _id: user._id });
-    const refreshToken = await generateRefreshJWT({ _id: user._id });
-    user.refreshTokens = user.refreshTokens.concat({ token: refreshToken });
-    await user.save();
-    return { accessToken, refreshToken };
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
 const generateJWT = (payload) =>
   new Promise((res, rej) =>
     jwt.sign(
@@ -78,6 +66,19 @@ const refreshToken = async (oldRefreshToken) => {
   await user.save();
 
   return { accessToken, refreshToken };
+};
+
+const authenticate = async (user) => {
+  try {
+    const accessToken = await generateJWT({ _id: user._id });
+    const refreshToken = await generateRefreshJWT({ _id: user._id });
+    user.refreshTokens = [];
+    user.refreshTokens = user.refreshTokens.concat({ token: refreshToken });
+    await user.save();
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 module.exports = { authenticate, verifyJWT, refreshToken };

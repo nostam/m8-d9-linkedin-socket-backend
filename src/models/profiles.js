@@ -1,7 +1,8 @@
 //const passportLocalMongoose = require('passport-local-mongoose');
 const { Schema } = require("mongoose");
 const mongoose = require("mongoose");
-const md5 = require("md5");
+const bcrypt = require("bcryptjs");
+
 const ProfileSchema = new Schema(
   {
     name: String,
@@ -13,6 +14,7 @@ const ProfileSchema = new Schema(
     image: { type: String, default: "https://picsum.photos/100" },
     username: { type: String, unique: true },
     password: String,
+    refreshToken: [{ token: String }],
   },
   {
     timestamps: true,
@@ -21,8 +23,24 @@ const ProfileSchema = new Schema(
 
 //ProfileSchema.plugin(passportLocalMongoose)
 
-ProfileSchema.pre("save", function (next) {
-  this.password = md5(this.password);
+ProfileSchema.statics.findByCredentials = async function (username, password) {
+  const user = await this.findOne({ username });
+  if (user) {
+    const isMatched = await bcrypt.compare(password, user.password);
+    if (isMatched) {
+      return user;
+    } else return null;
+  } else {
+    return null;
+  }
+};
+
+ProfileSchema.pre("save", async function (next) {
+  const user = this;
+  const plainPW = user.password;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(plainPW, 10);
+  }
   next();
 });
 
